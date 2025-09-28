@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora RPE - PWA</title>
+
+    <!-- Manifesto PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#764ba2">
+
+    <!-- Ícones para diferentes dispositivos -->
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="icons/icon-512.png">
+
+ <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .navigation {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #6c757d;
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: #ff6b6b;
+            border-bottom: 3px solid #ff6b6b;
+        }
+
+        .nav-btn:hover {
+            background: #e9ecef;
+        }
+
+        .calculator-section {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .calculator-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calculator-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .help-text {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .help-text h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .help-text p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        .emoji {
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .navigation {
+                flex-direction: column;
+            }
+
+            .calculator-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- (Seu HTML original aqui) -->
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💪 Calculadora RPE</h1>
+            <p>Ferramenta completa para cálculos de treino baseados em RPE</p>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn active" onclick="showCalculator('carga-rpe')">
+                📊 Carga RPE
+            </button>
+            <button class="nav-btn" onclick="showCalculator('pr')">
+                🏆 PR
+            </button>
+            <button class="nav-btn" onclick="showCalculator('backoff')">
+                📦 BackOff
+            </button>
+        </div>
+
+        <!-- Calculadora de Carga RPE -->
+        <div id="carga-rpe" class="calculator-section active">
+            <h2 class="calculator-title">📊 Calculadora de Carga RPE</h2>
+            
+            <div class="input-group">
+                <label for="reps">Número de Repetições:</label>
+                <input type="number" id="reps" min="1" max="10" placeholder="Ex: 5">
+            </div>
+
+            <div class="input-group">
+                <label for="rpe-carga">RPE Desejado:</label>
+                <select id="rpe-carga">
+                    <option value="">Selecione o RPE</option>
+                    <option value="6">6 - Fácil</option>
+                    <option value="6.5">6.5</option>
+                    <option value="7">7 - Moderado</option>
+                    <option value="7.5">7.5</option>
+                    <option value="8">8 - Pesado</option>
+                    <option value="8.5">8.5</option>
+                    <option value="9">9 - Muito Pesado</option>
+                    <option value="9.5">9.5</option>
+                    <option value="10">10 - Máximo</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="estimativa-1rm">Estimativa de 1RM (kg):</label>
+                <input type="number" id="estimativa-1rm" min="1" placeholder="Ex: 180">
+            </div>
+
+            <button class="btn-calculate" onclick="calcularCargaRPE()">Calcular Carga</button>
+
+            <div id="resultado-carga-rpe" class="result">
+                <h3><span class="emoji">✅</span>Resultado</h3>
+                <div id="carga-rpe-result"></div>
+            </div>
+
+            <div class="help-text">
+                <h4>💡 Como usar:</h4>
+                <p>Digite o número de repetições que deseja fazer, o RPE alvo e sua estimativa atual de 1RM. A calculadora retornará a carga sugerida para atingir o RPE desejado.</p>
+            </div>
+        </div>
+
+        <!-- Calculadora de PR -->
+        <div id="pr" class="calculator-section">
+            <h2 class="calculator-title">🏆 Calculadora de PR</h2>
+            
+            <div class="input-group">
+                <label for="peso-single">Peso do Single RPE 7 (kg):</label>
+                <input type="number" id="peso-single" min="1" placeholder="Ex: 200">
+            </div>
+
+            <div class="input-group">
+                <label for="fator-fadiga">Nível de Fadiga:</label>
+                <select id="fator-fadiga">
+                    <option value="">Selecione o nível</option>
+                    <option value="1">1 - Baixa</option>
+                    <option value="2">2 - Média</option>
+                    <option value="3">3 - Alta</option>
+                </select>
+            </div>
+
+            <button class="btn-calculate" onclick="calcularPR()">Calcular PR</button>
+
+            <div id="resultado-pr" class="result">
+                <h3><span class="emoji">🎯</span>Resultado</h3>
+                <div id="pr-result"></div>
+            </div>
+
+            <div class="help-text">
+                <h4>💡 Como usar:</h4>
+                <p>Digite o peso que você conseguiu fazer em um single com RPE 7 e selecione seu nível de fadiga atual. A calculadora estimará seu possível PR do dia.</p>
+            </div>
+        </div>
+
+        <!-- Calculadora de BackOff -->
+        <div id="backoff" class="calculator-section">
+            <h2 class="calculator-title">📦 Calculadora de BackOff</h2>
+            
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="peso-topset">Peso Top Set (kg):</label>
+                    <input type="number" id="peso-topset" min="1" placeholder="Ex: 200">
+                </div>
+
+                <div class="input-group">
+                    <label for="reps-topset">Reps Top Set:</label>
+                    <input type="number" id="reps-topset" min="1" max="10" placeholder="Ex: 3">
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="rpe-topset">RPE Top Set:</label>
+                    <select id="rpe-topset">
+                        <option value="">Selecione o RPE</option>
+                        <option value="6">6</option>
+                        <option value="6.5">6.5</option>
+                        <option value="7">7</option>
+                        <option value="7.5">7.5</option>
+                        <option value="8">8</option>
+                        <option value="8.5">8.5</option>
+                        <option value="9">9</option>
+                        <option value="9.5">9.5</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="reps-backoff">Reps BackOff:</label>
+                    <input type="number" id="reps-backoff" min="1" max="15" placeholder="Ex: 5">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="nivel-fadiga">Nível de Fadiga:</label>
+                <select id="nivel-fadiga">
+                    <option value="">Selecione o nível</option>
+                    <option value="baixa">Baixa</option>
+                    <option value="média">Média</option>
+                    <option value="alta">Alta</option>
+                </select>
+            </div>
+
+            <button class="btn-calculate" onclick="calcularBackOff()">Calcular BackOff</button>
+
+            <div id="resultado-backoff" class="result">
+                <h3><span class="emoji">📦</span>Resultado</h3>
+                <div id="backoff-result"></div>
+            </div>
+
+            <div class="help-text">
+                <h4>💡 Como usar:</h4>
+                <p>Digite os dados do seu top set (peso, reps e RPE), o número de repetições desejadas para o back-off e seu nível de fadiga atual. A calculadora sugerirá a carga ideal para os back-offs.</p>
+            </div>
+        </div>
+    </div>
+</body>
+    <script>
+        // (Seu JS original aqui)
+
+         // Função para alternar entre calculadoras
+        function showCalculator(calculatorId) {
+            // Remove classe active de todos os botões e seções
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.calculator-section').forEach(section => section.classList.remove('active'));
+            
+            // Adiciona classe active ao botão clicado
+            event.target.classList.add('active');
+            
+            // Mostra a seção correspondente
+            document.getElementById(calculatorId).classList.add('active');
+            
+            // Esconde todos os resultados
+            document.querySelectorAll('.result').forEach(result => result.classList.remove('show'));
+        }
+
+        // Tabela de referência para cálculo de carga RPE
+        const tabelaTopSet = {
+            "1,10": 1.0,   "1,9.5": 0.98,  "1,9": 0.96,  "1,8.5": 0.94,  "1,8": 0.92,  "1,7.5": 0.89,  "1,7": 0.86,  "1,6.5": 0.84,  "1,6": 0.81,
+            "2,10": 0.95,  "2,9.5": 0.93,  "2,9": 0.92,  "2,8.5": 0.9,   "2,8": 0.88,  "2,7.5": 0.86,  "2,7": 0.84,  "2,6.5": 0.81,  "2,6": 0.79,
+            "3,10": 0.92,  "3,9.5": 0.9,   "3,9": 0.88,  "3,8.5": 0.86,  "3,8": 0.84,  "3,7.5": 0.82,  "3,7": 0.80,  "3,6.5": 0.78,  "3,6": 0.76,
+            "4,10": 0.89,  "4,9.5": 0.87,  "4,9": 0.85,  "4,8.5": 0.83,  "4,8": 0.81,  "4,7.5": 0.79,  "4,7": 0.77,  "4,6.5": 0.75,  "4,6": 0.73,
+            "5,10": 0.86,  "5,9.5": 0.84,  "5,9": 0.82,  "5,8.5": 0.8,   "5,8": 0.78,  "5,7.5": 0.76,  "5,7": 0.74,  "5,6.5": 0.72,  "5,6": 0.7,
+            "6,10": 0.84,  "6,9.5": 0.82,  "6,9": 0.8,   "6,8.5": 0.78,  "6,8": 0.76,  "6,7.5": 0.74,  "6,7": 0.72,  "6,6.5": 0.7,   "6,6": 0.68,
+            "7,10": 0.81,  "7,9.5": 0.79,  "7,9": 0.77,  "7,8.5": 0.75,  "7,8": 0.73,  "7,7.5": 0.71,  "7,7": 0.69,  "7,6.5": 0.67,  "7,6": 0.65,
+            "8,10": 0.79,  "8,9.5": 0.77,  "8,9": 0.75,  "8,8.5": 0.73,  "8,8": 0.71,  "8,7.5": 0.69,  "8,7": 0.67,  "8,6.5": 0.65,  "8,6": 0.63,
+            "9,10": 0.76,  "9,9.5": 0.74,  "9,9": 0.72,  "9,8.5": 0.7,   "9,8": 0.68,  "9,7.5": 0.66,  "9,7": 0.64,  "9,6.5": 0.62,  "9,6": 0.6,
+            "10,10": 0.74, "10,9.5": 0.72, "10,9": 0.7,  "10,8.5": 0.68, "10,8": 0.66, "10,7.5": 0.64, "10,7": 0.62, "10,6.5": 0.6,  "10,6": 0.58
+        };
+
+        // Base de dados para cálculo de backoff
+        const baseReps = {
+            "10,1": 100, "10,2": 95, "10,3": 91, "10,4": 87, "10,5": 85, "10,6": 83, "10,7": 81, "10,8": 79, "10,9": 77, "10,10": 75, 
+            "9.5,1": 97, "9.5,2": 93, "9.5,3": 89, "9.5,4": 86, "9.5,5": 84, "9.5,6": 82, "9.5,7": 80, "9.5,8": 77.5, "9.5,9": 75, "9.5,10": 73, 
+            "9,1": 95, "9,2": 91, "9,3": 87, "9,4": 85, "9,5": 83, "9,6": 81, "9,7": 79, "9,8": 76, "9,9": 73, "9,10": 70, 
+            "8.5,1": 93, "8.5,2": 89, "8.5,3": 86, "8.5,4": 83, "8.5,5": 81, "8.5,6": 79, "8.5,7": 77.5, "8.5,8": 74.5, "8.5,9": 71.5, "8.5,10": 68.5,
+            "8,1": 91, "8,2": 87, "8,3": 85, "8,4": 83, "8,5": 81, "8,6": 76, "8,7": 73, "8,8": 70, "8,9": 67, "8,10": 64, 
+            "7.5,1": 89, "7.5,2": 86, "7.5,3": 84, "7.5,4": 82, "7.5,5": 80, "7.5,6": 77.5, "7.5,7": 74, "7.5,8": 71, "7.5,9": 68.5, "7.5,10": 65.5,
+            "7,1": 87, "7,2": 83, "7,3": 82, "7,4": 80, "7,5": 77, "7,6": 74, "7,7": 71, "7,8": 69, "7,9": 66.5, "7,10": 63, 
+            "6.5,1": 85, "6.5,2": 83, "6.5,3": 81, "6.5,4": 79, "6.5,5": 77, "6.5,6": 74.5, "6.5,7": 69, "6.5,8": 67, "6.5,9": 64.5, "6.5,10": 61.5,
+        };
+
+        const ajusteFadiga = {
+            "baixa": 0,
+            "média": 4,
+            "alta": 7
+        };
+
+        // Função para calcular carga RPE
+        function calcularCargaRPE() {
+            const reps = parseInt(document.getElementById('reps').value);
+            const rpe = parseFloat(document.getElementById('rpe-carga').value);
+            const estimativa1rm = parseFloat(document.getElementById('estimativa-1rm').value);
+
+            if (!reps || !rpe || !estimativa1rm) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            try {
+                const chave = `${reps},${rpe}`;
+                const fator = tabelaTopSet[chave];
+                
+                if (!fator) {
+                    throw new Error(`Não encontrei valores para ${reps} reps RPE ${rpe}`);
+                }
+
+                const carga = Math.round(fator * estimativa1rm * 10) / 10;
+                
+                document.getElementById('carga-rpe-result').innerHTML = `
+                    <div class="result-item">
+                        <span class="emoji">🎯</span><strong>Carga sugerida:</strong> ${carga} kg
+                    </div>
+                    <div class="result-item">
+                        <span class="emoji">📊</span><strong>Para:</strong> ${reps} repetições @RPE${rpe}
+                    </div>
+                    <div class="result-item">
+                        <span class="emoji">💪</span><strong>Baseado em 1RM:</strong> ${estimativa1rm} kg
+                    </div>
+                `;
+                
+                document.getElementById('resultado-carga-rpe').classList.add('show');
+            } catch (error) {
+                document.getElementById('carga-rpe-result').innerHTML = `
+                    <div class="result-item">
+                        <span class="emoji">❌</span><strong>Erro:</strong> ${error.message}
+                    </div>
+                `;
+                document.getElementById('resultado-carga-rpe').classList.add('show');
+            }
+        }
+
+        // Função para calcular PR
+        function calcularPR() {
+            const peso = parseFloat(document.getElementById('peso-single').value);
+            const fatorFadiga = parseInt(document.getElementById('fator-fadiga').value);
+
+            if (!peso || !fatorFadiga) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            let fatorFadigaAjustado;
+            switch(fatorFadiga) {
+                case 1: fatorFadigaAjustado = 1.03; break;
+                case 2: fatorFadigaAjustado = 1; break;
+                case 3: fatorFadigaAjustado = 0.97; break;
+            }
+
+            const cargaS7 = peso / 0.86 * fatorFadigaAjustado;
+            
+            document.getElementById('pr-result').innerHTML = `
+                <div class="result-item">
+                    <span class="emoji">🔹</span><strong>Single RPE 7:</strong> ${peso} kg
+                </div>
+                <div class="result-item">
+                    <span class="emoji">🎯</span><strong>Possível PR do dia:</strong> ${Math.round(cargaS7 * 10) / 10} kg
+                </div>
+            `;
+            
+            document.getElementById('resultado-pr').classList.add('show');
+        }
+
+        // Função para calcular backoff
+        function calcularBackOff() {
+            const pesoTopSet = parseFloat(document.getElementById('peso-topset').value);
+            const repsTopSet = parseInt(document.getElementById('reps-topset').value);
+            const rpeTopSet = parseFloat(document.getElementById('rpe-topset').value);
+            const repsBackoff = parseInt(document.getElementById('reps-backoff').value);
+            const nivelFadiga = document.getElementById('nivel-fadiga').value;
+
+            if (!pesoTopSet || !repsTopSet || !rpeTopSet || !repsBackoff || !nivelFadiga) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            try {
+                // Se RPE top é 6, retorno fixo
+                if (rpeTopSet === 6) {
+                    const porcentagemReducao = 6;
+                    const cargaBackoff = pesoTopSet - (porcentagemReducao/100 * pesoTopSet);
+                    
+                    document.getElementById('backoff-result').innerHTML = `
+                        <div class="result-item">
+                            <span class="emoji">🔹</span><strong>Top Set:</strong> ${pesoTopSet} kg x${repsTopSet} @RPE${rpeTopSet}
+                        </div>
+                        <div class="result-item">
+                            <span class="emoji">🧮</span><strong>Ajuste baseado em:</strong> ${repsBackoff} reps + fadiga ${nivelFadiga}
+                        </div>
+                        <div class="result-item">
+                            <span class="emoji">📉</span><strong>Carga back-off sugerida:</strong> ${Math.round(cargaBackoff * 10) / 10} kg
+                        </div>
+                        <div class="result-item">
+                            <span class="emoji">💡</span><strong>Nota:</strong> Ajuste prático com base na performance real.
+                        </div>
+                    `;
+                } else {
+                    const chaveTop = `${rpeTopSet},${repsTopSet}`;
+                    const chaveBackoff = `${rpeTopSet},${repsBackoff}`;
+                    
+                    const valorTop = baseReps[chaveTop];
+                    const valorBackoff = baseReps[chaveBackoff];
+                    const ajuste = ajusteFadiga[nivelFadiga.toLowerCase()] || 0;
+
+                    if (!valorTop || !valorBackoff) {
+                        throw new Error('Não encontrei valores para essa combinação de RPE e repetições');
+                    }
+
+                    const porcentagemReducao = valorTop - valorBackoff + ajuste;
+                    const cargaBackoff = pesoTopSet - (porcentagemReducao/100 * pesoTopSet);
+                    
+                    document.getElementById('backoff-result').innerHTML = `
+                        <div class="result-item">
+                            <span class="emoji">🔹</span><strong>Top Set:</strong> ${pesoTopSet} kg x${repsTopSet} @RPE${rpeTopSet}
+                        </div>
+                        <div class="result-item">
+                            <span class="emoji">🧮</span><strong>Ajuste baseado em:</strong> ${repsBackoff} reps + fadiga ${nivelFadiga}
+                        </div>
+                        <div class="result-item">
+                            <span class="emoji">📉</span><strong>Carga back-off sugerida:</strong> ${Math.round(cargaBackoff * 10) / 10} kg
+                        </div>
+                        <div class="result-item">
+                            <span class="emoji">💡</span><strong>Nota:</strong> Ajuste prático com base na performance real.
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('resultado-backoff').classList.add('show');
+            } catch (error) {
+                document.getElementById('backoff-result').innerHTML = `
+                    <div class="result-item">
+                        <span class="emoji">❌</span><strong>Erro:</strong> ${error.message}
+                    </div>
+                `;
+                document.getElementById('resultado-backoff').classList.add('show');
+            }
+        }
+        
+        // Registro do service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registrado!', reg))
+                .catch(err => console.error('Erro no Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>
