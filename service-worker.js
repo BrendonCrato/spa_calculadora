@@ -1,10 +1,10 @@
 const CACHE_NAME = "rpe-cache-v1";
 const URLS_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "/spa_calculadora/",
+  "/spa_calculadora/index.html",
+  "/spa_calculadora/manifest.json",
+  "/spa_calculadora/icons/icon-192.png",
+  "/spa_calculadora/icons/icon-512.png"
 ];
 
 // Instala e adiciona os arquivos ao cache
